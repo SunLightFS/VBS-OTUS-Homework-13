@@ -85,25 +85,39 @@ AS $function$
                 old_sum numeric(16, 2);
                 new_sum numeric(16, 2);
         begin
-                select goods.good_name, goods.good_price into good_name_var, good_price_var from goods where goods.goods_id = coalesce(new.good_id, old.good_id);
-                select sum_sale into old_sum from good_sum_mart where good_name = good_name_var;
+                select goods.good_name, goods.good_price
+                        into good_name_var, good_price_var
+                    from goods
+                    where goods.goods_id = coalesce(new.good_id, old.good_id);
+                select sum_sale
+                        into old_sum
+                    from good_sum_mart
+                    where good_name = good_name_var;
 
                 if (TG_OP = 'INSERT') then
                         if (select good_name_var in (select good_name from good_sum_mart)) then
                                 new_sum = old_sum + good_price_var * new.sales_qty;
-                                update good_sum_mart set sum_sale = new_sum where good_name = good_name_var;
+                                update good_sum_mart
+                                    set sum_sale = new_sum
+                                    where good_name = good_name_var;
                         else
-                                insert into good_sum_mart values (good_name_var, good_price_var * new.sales_qty);
+                                insert into good_sum_mart
+                                    values (good_name_var, good_price_var * new.sales_qty);
                         end if;
                 elsif (TG_OP = 'UPDATE') then
                         new_sum = old_sum - good_price_var * old.sales_qty + good_price_var * new.sales_qty;
-                        update good_sum_mart set sum_sale = new_sum where good_name = good_name_var;
+                        update good_sum_mart
+                            set sum_sale = new_sum
+                            where good_name = good_name_var;
                 elsif (TG_OP = 'DELETE') then
                         new_sum = old_sum - good_price_var * old.sales_qty;
                         if new_sum > 0 then
-                                update good_sum_mart set sum_sale = new_sum where good_name = good_name_var;
+                                update good_sum_mart
+                                    set sum_sale = new_sum
+                                    where good_name = good_name_var;
                         else
-                                delete from good_sum_mart where good_name = good_name_var;
+                                delete from good_sum_mart
+                                    where good_name = good_name_var;
                         end if;
                 end if;
                 return null;
@@ -203,3 +217,7 @@ otus=# select * from good_sum_mart;
  Спички хозайственные     |        62.00
 (2 rows)
 ```
+
+
+
+
